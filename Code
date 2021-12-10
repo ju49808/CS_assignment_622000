@@ -1,0 +1,98 @@
+import json
+import numpy as np
+import pandas as pd
+import itertools
+import re
+import hashlib
+from itertools import chain
+from random import shuffle
+
+# Uploading the data
+
+with open("TVs-all-merged.json") as jsonFile:
+    jsonObject = json.load(jsonFile)
+    jsonFile.close()
+    
+data = pd.DataFrame.from_dict(jsonObject, orient='index')
+df=[]
+for i in range(0,len(data)):
+    df.append(data.iloc[i,0])
+    
+#Creating the shingles
+
+k=3
+shingles=[]
+for i in range(0, len(df)):
+    shingle_set=[]
+    for j in range(len(df[i]['title'])-k +1):
+        shingle_set.append(df[i]['title'][j: j+k])
+    shingles.append(list((shingle_set)))
+    
+#Creating the unique shingle list
+
+voc=list(set(chain.from_iterable(shingles)))
+len(voc)
+
+#0/1 matrix
+
+mat=np.zeros((len(df),len(voc)))
+for i in range(0, len(df)):
+    for j in range(0,len(voc)):
+        for w in range(0,len(shingles[i])):
+            if voc[j] == shingles[i][w]:
+                mat[i][j] = 1
+            else:
+                mat[i][j] = 0
+
+#Minhashing
+
+def create_hash_func(size: int):
+    # function for creating the hash vector/function
+    hash_ex = list(range(1, len(voc)+1))
+    shuffle(hash_ex)
+    return hash_ex
+    
+def minhash_func(vocab_size: int, nbits: int):
+    # function for building multiple minhash vectors
+    hashes = []
+    for _ in range(nbits):
+        hashes.append(create_hash_func(vocab_size))
+    return hashes
+    
+#Creating 20 minhash vectors
+
+minhash= minhash_func(len(voc), 20)
+
+def signature(vec):
+    sign=[]
+    for func in minhash:
+        for i in range(1, len(vec)+1):
+            idx = func.index(i)
+            signature_val = vec[idx]
+            if signature_val == 1:
+                sign.append(idx)
+                break
+    return sign
+    
+sign=[]
+for i in range(1,len(mat)+1):
+    for j in mat[i]:
+        sign.append(signature(mat[i]))
+        
+#Jaccard similarity
+
+def jaccard(x,y):
+    s = len(x.intersection(y))/ len(x.union(y))
+    return s
+    
+#Split signatures    
+    
+def split_vec(signature, b):
+    assert len(signature)% b ==0
+    r = int(len(signature))/b
+    subvec=[]
+    for i in range(0, len(signature), r): 
+        subvec.append(signature[i: i+r])
+    return subvec
+    
+    
