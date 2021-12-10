@@ -1,5 +1,6 @@
 # CS_assignment_622000
-Final individual Computer assignment
+Final individual Computer Science assignment
+
 Make sure to upload the file "TVs-all-merged.json" before launching the code.
 
 This paper sums up the study that aims to  research duplicates in a data set. This report can be applied in different types of fields such as the marketing field, especially with the democratisation of technology that was followed with the expansion of e-commerce.
