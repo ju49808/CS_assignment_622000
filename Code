@@ -70,7 +70,7 @@ def signature(vec):
             idx = func.index(i)
             signature_val = vec[idx]
             if signature_val == 1:
-                sign.append(idx)
+                sign.append(i)
                 break
     return sign
     
